@@ -5,20 +5,26 @@ version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
-
-[workspace.dependencies]
-iced = "0.12.0"
-
-[workspace]
-members = [
-  "iced_decorator",
-]
-resolver = "2"
-
 [workspace.package]
 authors = ["Night Hunter"]
 description = "A collection of utilities for iced gui framework"
 repository = "https://github.com/n1ght-hunter/iced_rivet"
 categories = ["gui"]
 keywords = ["gui", "ui", "graphics", "interface", "widgets"]
+
+
+[dependencies]
+
+[workspace.dependencies]
+iced_decorator = { path = "iced_decorator" }
+
+
+iced = "0.12.0"
+
+[workspace]
+members = [
+  "iced_decorator",
+  "examples/*",
+]
+resolver = "2"
+

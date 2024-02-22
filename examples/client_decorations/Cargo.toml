@@ -1,0 +1,15 @@
+[package]
+name = "client_decorations"
+version = "0.1.0"
+edition = "2021"
+description = "show how to use iced with client decorations"
+authors.workspace = true
+repository.workspace = true
+categories.workspace = true
+keywords.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+iced_decorator.workspace = true
+iced.workspace = true

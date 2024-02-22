@@ -277,6 +277,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77e53693616d3075149f4ead59bdeecd204ac6b8192d8969757601b74bddf00f"
 
 [[package]]
+name = "client_decorations"
+version = "0.1.0"
+dependencies = [
+ "iced",
+ "iced_decorator",
+]
+
+[[package]]
 name = "clipboard-win"
 version = "5.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
