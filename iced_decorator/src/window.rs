@@ -3,9 +3,9 @@ use crate::helpers::reizer_operation::{SetState, RESIZER_ID};
 use crate::resizer::{resizer, ResizeEvent};
 use crate::{svgs, WindowHandler};
 use iced::advanced::graphics::core::Element;
-use iced::widget::text;
+
 use iced::{
-    widget::{button, container, horizontal_space, row, svg, themer},
+    widget::{button, container, horizontal_space, row, svg},
     window::{self, Id},
     Command, Length, Point, Rectangle, Size,
 };

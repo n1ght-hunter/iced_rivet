@@ -1,5 +1,5 @@
 use iced::{
-    widget::{container, row, text},
+    widget::{container, text},
     Application, Length,
 };
 
