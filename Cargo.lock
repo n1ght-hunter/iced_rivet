@@ -1093,6 +1093,9 @@ dependencies = [
 [[package]]
 name = "iced_rivet"
 version = "0.1.0"
+dependencies = [
+ "iced_decorator",
+]
 
 [[package]]
 name = "iced_runtime"

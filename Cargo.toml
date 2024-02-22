@@ -13,6 +13,11 @@ keywords = ["gui", "ui", "graphics", "interface", "widgets"]
 repository = "https://github.com/n1ght-hunter/iced_rivet"
 
 [dependencies]
+iced_decorator = {workspace = true, optional = true}
+
+[features]
+default = []
+decorator = ["iced_decorator"]
 
 [workspace.dependencies]
 iced_decorator = {path = "iced_decorator"}
