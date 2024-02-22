@@ -23,6 +23,12 @@ enum Message {
     WindowEvents(iced_decorator::window::WindowEvents),
 }
 
+impl iced_decorator::WindowHandler for Message {
+    fn event_handler(event: iced_decorator::window::WindowEvents) -> Self {
+        Message::WindowEvents(event)
+    }
+}
+
 impl Application for MenuTester {
     type Executor = iced::executor::Default;
 
@@ -37,7 +43,7 @@ impl Application for MenuTester {
             Self {
                 title: "Menu Tester".to_string(),
             },
-            iced::Command::none(),
+            iced_decorator::window::Window::init::<Self::Message>(),
         )
     }
 
@@ -64,7 +70,6 @@ impl Application for MenuTester {
         iced_decorator::window::Window::view(
             row![content],
             Some(text("testing")),
-            Message::WindowEvents,
             Some("Menu Tester"),
         )
         .into()

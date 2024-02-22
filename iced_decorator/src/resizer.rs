@@ -3,7 +3,7 @@ use std::io::{stdout, Write};
 use iced::{
     advanced::{
         layout, mouse, overlay, renderer,
-        widget::{tree, Operation, Tree},
+        widget::{tree, Id, Operation, Tree},
         Clipboard, Layout, Shell, Widget,
     },
     event, touch, window, Color, Element, Event, Length, Point, Rectangle, Size, Vector,
@@ -26,10 +26,10 @@ enum Dragging {
 }
 
 #[derive(Debug, Clone)]
-struct ResizeState {
+pub(crate) struct ResizeState {
     dragging: Dragging,
-    window_size: Size,
-    window_position: Point,
+    pub(crate) window_size: Size,
+    pub(crate) window_position: Point,
     show: bool,
 }
 
@@ -54,6 +54,7 @@ pub fn resizer<'a, Message, Theme, Renderer>(
 pub struct Resizer<'a, Message, Theme, Renderer> {
     content: Element<'a, Message, Theme, Renderer>,
     event_handler: Box<dyn Fn(ResizeEvent) -> Message + 'a>,
+    id: Option<Id>
 }
 
 impl<'a, Message, Theme, Renderer> Resizer<'a, Message, Theme, Renderer> {
@@ -65,7 +66,13 @@ impl<'a, Message, Theme, Renderer> Resizer<'a, Message, Theme, Renderer> {
         Self {
             content,
             event_handler: Box::new(event_handler),
+            id: None,
         }
+    }
+
+    pub fn id(mut self, id: Id) -> Self {
+        self.id = Some(id);
+        self
     }
 }
 
@@ -122,14 +129,16 @@ where
         renderer: &Renderer,
         operation: &mut dyn Operation<Message>,
     ) {
-        operation.container(None, layout.bounds(), &mut |operation| {
-            self.content.as_widget().operate(
-                &mut tree.children[0],
-                layout.children().next().unwrap(),
-                renderer,
-                operation,
-            );
-        });
+        let state = tree.state.downcast_mut::<ResizeState>();
+
+        operation.custom(state,self.id.as_ref());
+
+        self.content.as_widget().operate(
+            &mut tree.children[0],
+            layout.children().next().unwrap(),
+            renderer,
+            operation,
+        );
     }
 
     fn on_event(

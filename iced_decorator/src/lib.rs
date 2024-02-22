@@ -1,4 +1,8 @@
 pub mod drag_window;
-pub mod window;
+mod resizer;
 pub mod svgs;
-mod resize_handler;
+pub mod window;
+
+mod traits;
+
+pub use traits::*;

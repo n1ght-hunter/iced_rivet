@@ -1,14 +1,13 @@
 use crate::drag_window::DragWindow;
-use crate::resize_handler::{resizer, ResizeEvent, Resizer};
-use crate::svgs;
-use iced::widget::{container, horizontal_space, text};
-use iced::window::{self, Id};
+use crate::resizer::{resizer, ResizeEvent, ResizeState};
+use crate::{svgs, WindowHandler};
+use iced::advanced::widget::Operation;
 use iced::{
-    command,
-    widget::{button, row, svg},
-    Command, Element,
+    widget::{button, container, horizontal_space, row, svg},
+    window::{self, Id},
+    Command, Element, Length, Point, Rectangle, Size,
 };
-use iced::{Length, Point, Rectangle, Size};
+use lazy_static::lazy_static;
 
 pub struct Window;
 
@@ -20,21 +19,42 @@ pub enum TitleEvents {
 }
 
 #[derive(Debug, Clone)]
+enum UpdateResizerState {
+    Size(Size),
+    Position(Option<Point>),
+}
+
+#[derive(Debug, Clone)]
 pub enum WindowEvents {
     ResizeEvent(ResizeEvent),
     TitleEvent(TitleEvents),
+    UpdateResizerState(UpdateResizerState),
     DragWindow,
 }
 
 impl Window {
-    pub fn view<'a, Message, Theme, Renderer, F>(
+    pub fn init<Message: WindowHandler>() -> Command<Message> {
+        Command::batch(vec![
+            window::fetch_size(Id::MAIN, |size| {
+                Message::event_handler(WindowEvents::UpdateResizerState(UpdateResizerState::Size(
+                    size,
+                )))
+            }),
+            window::fetch_location(Id::MAIN, |position| {
+                Message::event_handler(WindowEvents::UpdateResizerState(
+                    UpdateResizerState::Position(position),
+                ))
+            }),
+        ])
+    }
+
+    pub fn view<'a, Message, Theme, Renderer>(
         content: impl Into<Element<'a, Message, Theme, Renderer>>,
         menu_bar: Option<impl Into<Element<'a, Message, Theme, Renderer>>>,
-        event_handler: F,
         title: Option<&'a str>,
     ) -> Element<'a, Message, Theme, Renderer>
     where
-        Message: 'a + Clone,
+        Message: 'a + Clone + WindowHandler,
         Renderer: 'a
             + iced::advanced::svg::Renderer
             + iced::advanced::Renderer
@@ -44,26 +64,24 @@ impl Window {
             + iced::widget::container::StyleSheet
             + iced::widget::text::StyleSheet
             + iced::widget::svg::StyleSheet,
-        F: 'a + Clone + Fn(WindowEvents) -> Message,
     {
-        let event_handler2 = event_handler.clone();
         let title_bar_buttons = row![
-            button(svg(svgs::minimize_svg()).height(30.0))
+            button(svg(svgs::MINIMIZE_SVG.clone()).height(30.0))
                 .width(50.0)
                 // .style(menu_theme::Button::OtherMenu)
-                .on_press((event_handler)(WindowEvents::TitleEvent(
+                .on_press(Message::event_handler(WindowEvents::TitleEvent(
                     TitleEvents::Minimize
                 ))),
-            button(svg(svgs::restore()).height(30.0))
+            button(svg(svgs::RESTORE_SVG.clone()).height(30.0))
                 .width(50.0)
                 // .style(menu_theme::Button::OtherMenu)
-                .on_press((event_handler)(WindowEvents::TitleEvent(
+                .on_press(Message::event_handler(WindowEvents::TitleEvent(
                     TitleEvents::Restore
                 ))),
-            button(svg(svgs::close_svg()).height(30.0))
+            button(svg(svgs::CLOSE_SVG.clone()).height(30.0))
                 .width(50.0)
                 // .style(menu_theme::Button::Close)
-                .on_press((event_handler)(WindowEvents::TitleEvent(
+                .on_press(Message::event_handler(WindowEvents::TitleEvent(
                     TitleEvents::Close
                 ))),
         ];
@@ -74,15 +92,18 @@ impl Window {
             } else {
                 horizontal_space().into()
             },
-            DragWindow::with_width(Length::Fill, (event_handler)(WindowEvents::DragWindow))
-                .set_title(title),
+            DragWindow::with_width(
+                Length::Fill,
+                Message::event_handler(WindowEvents::DragWindow)
+            )
+            .set_title(title),
             title_bar_buttons
         ])
         .height(35.0);
 
-        let window = resizer(text("text"), move |e| {
-            (event_handler2)(WindowEvents::ResizeEvent(e))
-        });
+        let window = resizer(menu_bar, |e| {
+            Message::event_handler(WindowEvents::ResizeEvent(e))
+        }).id(RESIZER_ID.clone());
         window.into()
     }
 }
@@ -112,14 +133,80 @@ impl Window {
                     return window::minimize(Id::MAIN, true);
                 }
                 TitleEvents::Restore => {
-                    return window::minimize(Id::MAIN, false);
+                    return window::toggle_maximize(Id::MAIN);
                 }
                 TitleEvents::Close => {
                     return window::close(Id::MAIN);
                 }
             },
+            WindowEvents::UpdateResizerState(urs) => match urs {
+                UpdateResizerState::Size(size) => {
+                    println!("Size: {:?}", size);
+                    return Command::widget(SetState::with_size(size));
+                }
+                UpdateResizerState::Position(position) => {
+                    if let Some(position) = position {
+                        println!("Position: {:?}", position);
+                        return Command::widget(SetState::with_position(position));
+                    }
+                }
+            },
             WindowEvents::DragWindow => {
                 return window::drag(Id::MAIN);
+            }
+        }
+        Command::none()
+    }
+}
+
+lazy_static! {
+    static ref RESIZER_ID: iced::advanced::widget::Id = iced::advanced::widget::Id::new("rsizer");
+}
+struct SetState {
+    id: iced::advanced::widget::Id,
+    position: Option<Point>,
+    size: Option<Size>,
+}
+
+impl SetState {
+    pub fn with_position(position: Point) -> Self {
+        SetState {
+            id: RESIZER_ID.clone(),
+            position: Some(position),
+            size: None,
+        }
+    }
+
+    pub fn with_size(size: Size) -> Self {
+        SetState {
+            id: RESIZER_ID.clone(),
+            position: None,
+            size: Some(size),
+        }
+    }
+}
+
+impl<T> Operation<T> for SetState {
+    fn container(
+        &mut self,
+        _id: Option<&iced::advanced::widget::Id>,
+        _bounds: Rectangle,
+        operate_on_children: &mut dyn FnMut(&mut dyn Operation<T>),
+    ) {
+        operate_on_children(self)
+    }
+
+    fn custom(&mut self, state: &mut dyn std::any::Any, id: Option<&iced::advanced::widget::Id>) {
+        if Some(&self.id) == id {
+            if let Some(state) = state.downcast_mut::<ResizeState>() {
+                if let Some(position) = self.position {
+                    println!("Setting position: {:?}", position);
+                    state.window_position = position;
+                }
+                if let Some(size) = self.size {
+                    println!("Setting size: {:?}", size);
+                    state.window_size = size;
+                }
             }
         }
     }
