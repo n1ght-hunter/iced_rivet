@@ -40,7 +40,7 @@ impl Window {
                     size,
                 )))
             }),
-            window::fetch_location(Id::MAIN, |position| {
+            window::fetch_position(Id::MAIN, |position| {
                 Message::event_handler(WindowEvents::UpdateResizerState(
                     UpdateResizerState::Position(position),
                 ))
