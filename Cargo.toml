@@ -23,7 +23,7 @@ decorator = ["iced_decorator"]
 iced_decorator = {path = "iced_decorator"}
 
 # iced = "0.12.0"
-iced = { git = "https://github.com/n1ght-hunter/iced.git", branch = "add-action-fetch-location", features = ["advanced", "svg"] }
+iced = { git = "https://github.com/iced-rs/iced.git", rev="ff49f581fa153e12e0160353fe348e4289a0837e", features = ["advanced", "svg"] }
 lazy_static = "1.4.0"
 
 [workspace]
