@@ -43,7 +43,7 @@ impl Application for MenuTester {
             Self {
                 title: "Menu Tester".to_string(),
             },
-            iced_decorator::window::Window::init::<Self::Message>(),
+            iced_decorator::window::init::<Self::Message>(),
         )
     }
 
@@ -53,24 +53,19 @@ impl Application for MenuTester {
 
     fn update(&mut self, message: Self::Message) -> iced::Command<Self::Message> {
         match message {
-            Message::WindowEvents(event) => {
-                return iced_decorator::window::Window::event_handler(event)
-            }
+            Message::WindowEvents(event) => return iced_decorator::window::event_handler(event),
         };
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message, Self::Theme, iced::Renderer> {
         let content = container(text("Hello, World!"))
-            .width(Length::Fill)
             .height(Length::Fill)
             .center_x()
             .center_y();
 
-        iced_decorator::window::Window::view(
-            row![content],
-            Some(text("testing")),
-            Some("Menu Tester"),
-        )
-        .into()
+        iced_decorator::window::Window::new()
+            .title(self.title.clone())
+            .content(content)
+            .into()
     }
 }

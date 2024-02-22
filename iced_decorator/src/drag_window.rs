@@ -7,14 +7,14 @@ use iced::{
 ///
 /// It can be useful if you want to fill some space with nothing.
 #[derive(Debug)]
-pub struct DragWindow<'a, Message> {
+pub struct DragWindow<Message> {
     width: Length,
     height: Length,
     message: Message,
-    title: Option<&'a str>,
+    title: Option<String>,
 }
 
-impl<'a, Message> DragWindow<'a, Message> {
+impl<Message> DragWindow<Message> {
     /// Creates an amount of empty [`Space`] with the given width and height.
     pub fn new(width: impl Into<Length>, height: impl Into<Length>, message: Message) -> Self {
         DragWindow {
@@ -45,13 +45,13 @@ impl<'a, Message> DragWindow<'a, Message> {
         }
     }
 
-    pub fn set_title(mut self, title: Option<&'a str>) -> Self {
+    pub fn set_title(mut self, title: Option<String>) -> Self {
         self.title = title;
         self
     }
 }
 
-impl<'a, Message, Theme, Renderer> Widget<Message, Theme, Renderer> for DragWindow<'a, Message>
+impl<'a, Message, Theme, Renderer> Widget<Message, Theme, Renderer> for DragWindow<Message>
 where
     Message: Clone,
     Renderer: iced::advanced::Renderer + iced::advanced::text::Renderer,
@@ -145,13 +145,13 @@ where
     }
 }
 
-impl<'a, Message, Theme, Renderer> From<DragWindow<'a, Message>>
+impl<'a, Message, Theme, Renderer> From<DragWindow<Message>>
     for Element<'a, Message, Theme, Renderer>
 where
     Message: 'a + Clone,
     Renderer: 'a + iced::advanced::Renderer + iced::advanced::text::Renderer,
 {
-    fn from(space: DragWindow<'a, Message>) -> Element<'a, Message, Theme, Renderer> {
+    fn from(space: DragWindow<Message>) -> Element<'a, Message, Theme, Renderer> {
         Element::new(space)
     }
 }
