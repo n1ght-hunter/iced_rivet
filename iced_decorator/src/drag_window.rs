@@ -1,6 +1,6 @@
 use iced::{
     advanced::{layout, widget::Tree, Text, Widget},
-    alignment, mouse, touch, Element, Event, Length, Point, Rectangle, Size,
+    alignment, mouse, touch, Element, Event, Length, Point, Size,
 };
 
 /// An amount of empty space.
@@ -65,8 +65,8 @@ where
 
     fn layout(
         &self,
-        tree: &mut Tree,
-        renderer: &Renderer,
+        _tree: &mut Tree,
+        _renderer: &Renderer,
         limits: &layout::Limits,
     ) -> layout::Node {
         let limits = limits.width(self.width).height(self.height);
@@ -99,13 +99,13 @@ where
 
     fn draw(
         &self,
-        tree: &Tree,
+        _tree: &Tree,
         renderer: &mut Renderer,
-        theme: &Theme,
+        _theme: &Theme,
         style: &iced::advanced::renderer::Style,
         layout: layout::Layout<'_>,
-        cursor: iced::advanced::mouse::Cursor,
-        viewport: &iced::Rectangle,
+        _cursor: iced::advanced::mouse::Cursor,
+        _viewport: &iced::Rectangle,
     ) {
         if let Some(title) = &self.title {
             let bounds = layout.bounds();
@@ -137,7 +137,7 @@ where
                     horizontal_alignment,
                     vertical_alignment,
                 },
-                Point::new(0.0, 0.0),
+                Point::new(x, y),
                 style.text_color,
                 bounds,
             );

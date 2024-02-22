@@ -38,7 +38,7 @@ impl Application for MenuTester {
 
     type Flags = ();
 
-    fn new(flags: Self::Flags) -> (Self, iced::Command<Self::Message>) {
+    fn new(_flags: Self::Flags) -> (Self, iced::Command<Self::Message>) {
         (
             Self {
                 title: "Menu Tester".to_string(),
@@ -57,7 +57,6 @@ impl Application for MenuTester {
                 return iced_decorator::window::Window::event_handler(event)
             }
         };
-        iced::Command::none()
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message, Self::Theme, iced::Renderer> {

@@ -19,7 +19,7 @@ pub enum TitleEvents {
 }
 
 #[derive(Debug, Clone)]
-enum UpdateResizerState {
+pub enum UpdateResizerState {
     Size(Size),
     Position(Option<Point>),
 }
@@ -49,7 +49,7 @@ impl Window {
     }
 
     pub fn view<'a, Message, Theme, Renderer>(
-        content: impl Into<Element<'a, Message, Theme, Renderer>>,
+        _content: impl Into<Element<'a, Message, Theme, Renderer>>,
         menu_bar: Option<impl Into<Element<'a, Message, Theme, Renderer>>>,
         title: Option<&'a str>,
     ) -> Element<'a, Message, Theme, Renderer>
@@ -103,7 +103,8 @@ impl Window {
 
         let window = resizer(menu_bar, |e| {
             Message::event_handler(WindowEvents::ResizeEvent(e))
-        }).id(RESIZER_ID.clone());
+        })
+        .id(RESIZER_ID.clone());
         window.into()
     }
 }

@@ -1,5 +1,3 @@
-use std::io::{stdout, Write};
-
 use iced::{
     advanced::{
         layout, mouse, overlay, renderer,
@@ -21,7 +19,6 @@ enum Dragging {
     HorizontalLeft,
     VerticalTop,
     VerticalBottom,
-    Both,
     None,
 }
 
@@ -54,7 +51,7 @@ pub fn resizer<'a, Message, Theme, Renderer>(
 pub struct Resizer<'a, Message, Theme, Renderer> {
     content: Element<'a, Message, Theme, Renderer>,
     event_handler: Box<dyn Fn(ResizeEvent) -> Message + 'a>,
-    id: Option<Id>
+    id: Option<Id>,
 }
 
 impl<'a, Message, Theme, Renderer> Resizer<'a, Message, Theme, Renderer> {
@@ -131,7 +128,7 @@ where
     ) {
         let state = tree.state.downcast_mut::<ResizeState>();
 
-        operation.custom(state,self.id.as_ref());
+        operation.custom(state, self.id.as_ref());
 
         self.content.as_widget().operate(
             &mut tree.children[0],
@@ -152,7 +149,7 @@ where
         shell: &mut Shell<'_, Message>,
         viewport: &Rectangle,
     ) -> event::Status {
-        let mut state = tree.state.downcast_mut::<ResizeState>();
+        let state = tree.state.downcast_mut::<ResizeState>();
         let mut bounds = Rectangle::new(state.window_position, state.window_size);
 
         let cursor_position = cursor.position();
