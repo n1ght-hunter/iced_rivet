@@ -3,6 +3,6 @@ mod resizer;
 pub mod svgs;
 pub mod window;
 
-mod traits;
+pub(crate) mod helpers;
 
-pub use traits::*;
+pub use helpers::traits::*;
