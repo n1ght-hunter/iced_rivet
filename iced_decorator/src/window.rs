@@ -142,12 +142,10 @@ impl Window {
             },
             WindowEvents::UpdateResizerState(urs) => match urs {
                 UpdateResizerState::Size(size) => {
-                    println!("Size: {:?}", size);
                     return Command::widget(SetState::with_size(size));
                 }
                 UpdateResizerState::Position(position) => {
                     if let Some(position) = position {
-                        println!("Position: {:?}", position);
                         return Command::widget(SetState::with_position(position));
                     }
                 }
@@ -201,11 +199,9 @@ impl<T> Operation<T> for SetState {
         if Some(&self.id) == id {
             if let Some(state) = state.downcast_mut::<ResizeState>() {
                 if let Some(position) = self.position {
-                    println!("Setting position: {:?}", position);
                     state.window_position = position;
                 }
                 if let Some(size) = self.size {
-                    println!("Setting size: {:?}", size);
                     state.window_size = size;
                 }
             }
