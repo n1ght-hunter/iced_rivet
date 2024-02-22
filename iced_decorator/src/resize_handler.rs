@@ -281,7 +281,6 @@ where
         viewport: &Rectangle,
         renderer: &Renderer,
     ) -> mouse::Interaction {
-        stdout().flush().unwrap();
         let state = tree.state.downcast_ref::<ResizeState>();
         let cursor_position = cursor.position();
 
