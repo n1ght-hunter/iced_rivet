@@ -19,4 +19,6 @@ resolver = "2"
 [workspace.package]
 authors = ["Night Hunter"]
 description = "A collection of utilities for iced gui framework"
-repository = ""
+repository = "https://github.com/n1ght-hunter/iced_rivet"
+categories = ["gui"]
+keywords = ["gui", "ui", "graphics", "interface", "widgets"]
