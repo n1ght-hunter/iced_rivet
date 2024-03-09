@@ -1,33 +1,39 @@
 use libloading::library_filename;
 use std::{any::Any, collections::HashMap, ffi::OsStr, marker::PhantomData, ops::Deref, sync::Arc};
 
+
+/// A message type that can be used by plugins.
 #[derive(Clone, Debug)]
 pub struct MessageType(Arc<Box<dyn Any + Send + Sync>>);
 
 impl MessageType {
+    /// Create a new message
     pub fn new<T: 'static + Send + Sync>(message: T) -> Self {
         Self(Arc::new(Box::new(message)))
     }
 
-    pub fn downcast_ref<T: 'static>(&self) -> Option<&T> {
-        self.0.deref().downcast_ref()
-    }
-
+    /// Attempt to downcast the message to a concrete type.
     pub fn downcast<T: 'static>(self) -> Result<T, ()> {
         let value = Arc::try_unwrap(self.0).map_err(|_| ())?;
         value.downcast::<T>().map_err(|_| ()).map(|value| *value)
     }
 }
 
+/// A plugin that can be loaded into the application.
 pub trait Plugin: Send + Sync {
+    /// will be called to render an iced view
     fn view(&self) -> iced::Element<'_, MessageType>;
 
+    /// will be called from plugin messages
     fn update(&mut self, message: MessageType) -> iced::Command<MessageType>;
 
+    /// subscription
     fn subscription(&self) -> Option<iced::Subscription<MessageType>> {
         None
     }
 
+    /// name of the plugin
+    /// will create a default implementation
     fn name(&self) -> &str {
         std::any::type_name::<Self>()
     }
@@ -40,13 +46,18 @@ pub trait Plugin: Send + Sync {
     }
 }
 
+/// the type that will need to be returned from the new_plugin function in dll
 pub type PluginFunction = Box<dyn Plugin>;
+
+
 type CreatePlugin = fn() -> PluginFunction;
 
+/// A trait that will be implemented by the application message to handle plugin messages.
 pub trait PluginLoader {
     fn plugin_message(id: u16, message: MessageType) -> Self;
 }
 
+/// A handler for plugins.
 pub struct PluginHandler<T: 'static + PluginLoader> {
     plugins: HashMap<u16, (libloading::Library, Box<dyn Plugin>)>,
     message: PhantomData<T>,
@@ -54,6 +65,7 @@ pub struct PluginHandler<T: 'static + PluginLoader> {
 }
 
 impl<T: 'static + PluginLoader> PluginHandler<T> {
+    /// Create a new plugin handler.
     pub fn new() -> Self {
         Self {
             plugins: HashMap::new(),
@@ -62,6 +74,7 @@ impl<T: 'static + PluginLoader> PluginHandler<T> {
         }
     }
 
+    /// Load a plugin from a path.
     pub fn load<P: AsRef<OsStr>>(&mut self, path: P) -> Result<(), libloading::Error> {
         let lib = unsafe { libloading::Library::new(library_filename(path))? };
         let func = unsafe { lib.get::<CreatePlugin>(b"new_plugin")? };
@@ -71,12 +84,14 @@ impl<T: 'static + PluginLoader> PluginHandler<T> {
         Ok(())
     }
 
+    /// Unload a plugin by its id.
     pub fn unload(&mut self, id: u16) {
         if let Some((lib, _)) = self.plugins.remove(&id) {
             drop(lib);
         }
     }
 
+    /// Update a plugin with a message.
     pub fn plugin_update(&mut self, id: u16, message: MessageType) -> iced::Command<T> {
         let update = if let Some((_, plugin)) = self.plugins.get_mut(&id) {
             plugin.update(message)
@@ -87,6 +102,7 @@ impl<T: 'static + PluginLoader> PluginHandler<T> {
         update.map(move |message| T::plugin_message(id, message))
     }
 
+    /// Get the view of a plugin by its id.
     pub fn plugin_view(&self, id: u16) -> Option<iced::Element<'_, T>> {
         self.plugins
             .get(&id)
