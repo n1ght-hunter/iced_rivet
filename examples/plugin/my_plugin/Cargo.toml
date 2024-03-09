@@ -16,3 +16,4 @@ crate-type = ["dylib"]
 
 [dependencies]
 iced_plugin.workspace = true
+iced.workspace = true
