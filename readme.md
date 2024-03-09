@@ -17,5 +17,7 @@ iced_rivet = "0.1.0"
 ```
 
 ### sub-crates
-(iced_decorator)[iced_decorator/readme.md] - add window decorations to your iced app
-(iced_plugin)[iced_plugin/readme.md] - add plugin support to your iced app
+[iced_decorator](iced_decorator/readme.md) - add window decorations to your iced app
+
+[iced_plugin](iced_plugin/readme.md) - add plugin support to your iced app
+
