@@ -2,7 +2,7 @@
 
 
 run-plugin: build-plugin
-	cargo run -p example
+	cargo run -p plugin_example
 
 build-plugin: 
 	cargo build -p my_plugin
