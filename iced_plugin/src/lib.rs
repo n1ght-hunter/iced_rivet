@@ -1,7 +1,23 @@
 use libloading::library_filename;
-use std::{any::Any, collections::HashMap, ffi::OsStr, marker::PhantomData};
+use std::{any::Any, collections::HashMap, ffi::OsStr, marker::PhantomData, ops::Deref, sync::Arc};
 
-pub type MessageType = Box<dyn Any + Send>;
+#[derive(Clone, Debug)]
+pub struct MessageType(Arc<Box<dyn Any + Send + Sync>>);
+
+impl MessageType {
+    pub fn new<T: 'static + Send + Sync>(message: T) -> Self {
+        Self(Arc::new(Box::new(message)))
+    }
+
+    pub fn downcast_ref<T: 'static>(&self) -> Option<&T> {
+        self.0.deref().downcast_ref()
+    }
+
+    pub fn downcast<T: 'static>(self) -> Result<T, ()> {
+        let value = Arc::try_unwrap(self.0).map_err(|_| ())?;
+        value.downcast::<T>().map_err(|_| ()).map(|value| *value)
+    }
+}
 
 pub trait Plugin: Send + Sync {
     fn view(&self) -> iced::Element<'_, MessageType>;
@@ -33,25 +49,25 @@ pub trait PluginLoader {
 
 pub struct PluginHandler<T: 'static + PluginLoader> {
     plugins: HashMap<u16, (libloading::Library, Box<dyn Plugin>)>,
-    message: PhantomData<T>
+    message: PhantomData<T>,
+    counter: u16,
 }
 
 impl<T: 'static + PluginLoader> PluginHandler<T> {
     pub fn new() -> Self {
         Self {
             plugins: HashMap::new(),
-            message: PhantomData
+            message: PhantomData,
+            counter: 0,
         }
     }
 
-    pub fn load<P: AsRef<OsStr>>(&mut self, id: u16, path: P) -> Result<(), libloading::Error> {
+    pub fn load<P: AsRef<OsStr>>(&mut self, path: P) -> Result<(), libloading::Error> {
         let lib = unsafe { libloading::Library::new(library_filename(path))? };
-        println!("Loading plugin");
         let func = unsafe { lib.get::<CreatePlugin>(b"new_plugin")? };
-        println!("Plugin loaded");
         let plugin = func();
-        println!("Plugin created");
-        self.plugins.insert(id, (lib, plugin));
+        self.plugins.insert(self.counter, (lib, plugin));
+        self.counter += 1;
         Ok(())
     }
 
@@ -71,23 +87,26 @@ impl<T: 'static + PluginLoader> PluginHandler<T> {
         update.map(move |message| T::plugin_message(id, message))
     }
 
-    pub fn plugin_view(&self, id: u16) -> iced::Element<'_, T> {
-        let view = if let Some((_, plugin)) = self.plugins.get(&id) {
-            plugin.view()
-        } else {
-            iced::widget::text("Plugin not found").into()
-        };
+    pub fn plugin_view(&self, id: u16) -> Option<iced::Element<'_, T>> {
+        self.plugins
+            .get(&id)
+            .map(|(_, plugin)| plugin.view())
+            .map(move |view| view.map(move |message| T::plugin_message(id, message)))
+    }
 
-        view.map(move |message| T::plugin_message(id, message))
+    pub fn plugin_info(&self) -> Vec<(u16, String)> {
+        self.plugins
+            .iter()
+            .map(|(id, (_, plugin))| (id.clone(), plugin.name().to_string()))
+            .collect()
     }
 
     pub fn drop_libs(&mut self) {
         for (_, (lib, _)) in self.plugins.drain() {
-            drop(lib);
+            lib.close().unwrap();
         }
     }
 }
-
 
 impl<T: 'static + PluginLoader> Drop for PluginHandler<T> {
     fn drop(&mut self) {

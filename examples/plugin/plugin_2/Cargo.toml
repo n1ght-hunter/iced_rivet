@@ -1,0 +1,19 @@
+[package]
+name = "plugin_2"
+version = "0.1.0"
+edition = "2021"
+authors.workspace = true
+categories.workspace = true
+description.workspace = true
+keywords.workspace = true
+repository.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "plugin_2"
+crate-type = ["dylib"] 
+
+[dependencies]
+iced_plugin.workspace = true
+iced.workspace = true

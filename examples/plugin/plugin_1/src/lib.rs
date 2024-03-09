@@ -16,7 +16,7 @@ impl iced_plugin::Plugin for MyPlugin {
     }
 
     fn update(&mut self, message: MessageType) -> iced::Command<MessageType> {
-        let message = message.downcast::<MessageType>().unwrap();
+        let message = message.downcast_ref::<MessageType>().unwrap();
         match message {
             _ => {}
         }
