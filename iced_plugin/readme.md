@@ -8,5 +8,5 @@ a simple crate for adding plugin support to your iced app
 - [ ] handle plugin errors
 - [ ] iced subscriptions
 
-[example](examples/plugin/plugin_example) - run with make run-plugin
+[example](../examples/plugin/plugin_example) - run with make run-plugin
 
