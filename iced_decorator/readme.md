@@ -11,3 +11,6 @@ a simple crate for creating a window without decorations
 - [ ] optional window icon
 - [ ] permanet theme 
 - [ ] more configurable whole window
+
+## Todo
+- [ ] publish to crates.io

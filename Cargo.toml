@@ -14,6 +14,7 @@ repository = "https://github.com/n1ght-hunter/iced_rivet"
 
 [dependencies]
 iced_decorator = {workspace = true, optional = true}
+libloading = "0.8.3"
 
 [features]
 default = []
@@ -21,6 +22,9 @@ decorator = ["iced_decorator"]
 
 [workspace.dependencies]
 iced_decorator = {path = "iced_decorator"}
+iced_plugin = {path = "iced_plugin"}
+libloading = "0.8.3"
+downcast-rs = "1.2.0"
 
 # iced = "0.12.0"
 iced = { git = "https://github.com/iced-rs/iced.git", rev="2f289af93c0bfef51698e1aca50696aef1cc6ecc", features = ["advanced", "svg"] }
@@ -29,6 +33,8 @@ lazy_static = "1.4.0"
 [workspace]
 members = [
   "iced_decorator",
-  "examples/*",
+  "examples/client_decorations",
+  "iced_plugin",
+   "examples/plugin/*",
 ]
 resolver = "2"
