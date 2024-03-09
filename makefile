@@ -5,7 +5,7 @@ run-plugin: build-plugin
 	cargo run -p plugin_example
 
 build-plugin: 
-	cargo build -p my_plugin
+	cargo build -p my_plugin --release
 
 clean:
 	cargo clean

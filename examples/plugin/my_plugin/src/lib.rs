@@ -1,17 +1,25 @@
+use iced_plugin::{PluginFunction, MessageType};
+
 #[no_mangle]
-pub fn new_plugin() -> Box<dyn iced_plugin::Plugin> {
-    Box::new(MyPlugin {})
+pub fn new_plugin() -> PluginFunction {
+    Box::new(MyPlugin)
 }
 
 pub struct MyPlugin;
 
-// #[derive(Debug)]
-// pub enum Message {}
+#[derive(Debug)]
+pub enum Message {}
 
 impl iced_plugin::Plugin for MyPlugin {
-    fn run(&self) {
-        println!("Hello from my plugin!");
+    fn view(&self) -> iced::Element<'_, MessageType> {
+        iced::widget::text("Hello, world!").into()
     }
-    
-    // type Message = Message;
+
+    fn update(&mut self, message: MessageType) -> iced::Command<MessageType> {
+        let message = message.downcast::<MessageType>().unwrap();
+        match message {
+            _ => {}
+        }
+        iced::Command::none()
+    }
 }
