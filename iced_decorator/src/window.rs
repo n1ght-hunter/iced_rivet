@@ -4,6 +4,7 @@ use crate::resizer::{resizer, ResizeEvent};
 use crate::{svgs, WindowHandler};
 use iced::advanced::graphics::core::Element;
 
+use iced::widget::themer;
 use iced::{
     widget::{button, container, horizontal_space, row, svg},
     window::{self, Id},
@@ -37,6 +38,8 @@ pub struct Window<'a, Message, Theme, Renderer> {
     content: Option<Element<'a, Message, Theme, Renderer>>,
     /// put title into the middle of the menu bar
     title: Option<String>,
+    /// theme for the panel buttons
+    panel_theme: crate::PanelTheme,
 }
 
 impl<'a, Message, Theme, Renderer> Window<'a, Message, Theme, Renderer> {
@@ -44,6 +47,7 @@ impl<'a, Message, Theme, Renderer> Window<'a, Message, Theme, Renderer> {
         Window {
             content: None,
             title: None,
+            panel_theme: crate::PanelTheme::default(),
         }
     }
 
@@ -54,6 +58,14 @@ impl<'a, Message, Theme, Renderer> Window<'a, Message, Theme, Renderer> {
 
     pub fn title(mut self, title: impl Into<String>) -> Self {
         self.title = Some(title.into());
+        self
+    }
+
+    pub fn panel_theme(
+        mut self,
+        panel_theme: crate::PanelTheme,
+    ) -> Self {
+        self.panel_theme = panel_theme;
         self
     }
 
@@ -72,18 +84,21 @@ impl<'a, Message, Theme, Renderer> Window<'a, Message, Theme, Renderer> {
     {
         let title_bar_buttons = row![
             button(svg(svgs::MINIMIZE_SVG.clone()).height(30.0))
+                .style(crate::theming::panel_buttons::Button::Minimize)
                 .width(50.0)
                 // .style(menu_theme::Button::OtherMenu)
                 .on_press(Message::event_handler(WindowEvents::TitleEvent(
                     TitleEvents::Minimize
                 ))),
             button(svg(svgs::RESTORE_SVG.clone()).height(30.0))
+                .style(crate::theming::panel_buttons::Button::Restore)
                 .width(50.0)
                 // .style(menu_theme::Button::OtherMenu)
                 .on_press(Message::event_handler(WindowEvents::TitleEvent(
                     TitleEvents::Restore
                 ))),
             button(svg(svgs::CLOSE_SVG.clone()).height(30.0))
+                .style(crate::theming::panel_buttons::Button::Close)
                 .width(50.0)
                 // .style(menu_theme::Button::Close)
                 .on_press(Message::event_handler(WindowEvents::TitleEvent(
@@ -104,7 +119,10 @@ impl<'a, Message, Theme, Renderer> Window<'a, Message, Theme, Renderer> {
                 Message::event_handler(WindowEvents::DragWindow)
             )
             .set_title(self.title),
-            title_bar_buttons
+            themer(
+                self.panel_theme,
+                title_bar_buttons
+            )
         ])
         .height(35.0);
 

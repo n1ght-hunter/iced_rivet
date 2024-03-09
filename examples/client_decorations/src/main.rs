@@ -47,6 +47,10 @@ impl Application for MenuTester {
         )
     }
 
+    fn theme(&self) -> Self::Theme {
+        iced::Theme::Dracula
+    }
+
     fn title(&self) -> String {
         self.title.clone()
     }
@@ -65,7 +69,7 @@ impl Application for MenuTester {
 
         iced_decorator::window::Window::new()
             .title(self.title.clone())
-            .content(content)
+            .content(content).panel_theme(iced_decorator::PanelTheme::DARK)
             .into()
     }
 }
